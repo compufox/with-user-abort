@@ -3,4 +3,6 @@
   :author "ava fox"
   :license  "BSD 3-Clause"
   :version "0.1"
-  :components ((:file "package")))
+  :serial t
+  :components ((:file "package")
+	       (:file "main")))
