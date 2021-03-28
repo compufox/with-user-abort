@@ -12,6 +12,15 @@
   (declare (ignore condition))
   (signal 'user-abort))
 
+#+ccl
+(progn
+  (defun ccl-break-hook (cond hook)
+    "SIGINT handler on CCL."
+    (declare (ignore hook))
+    (signal cond))
+
+  (setf ccl:*break-hook* #'ccl-break-hook))
+
 (defmacro with-user-abort (&body body)
   "execute BODY, signalling user-abort if the interrupt signal is received"
   `(handler-bind ((#+sbcl sb-sys:interactive-interrupt
