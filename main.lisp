@@ -1,10 +1,17 @@
 (in-package :with-user-abort)
 
-(define-condition user-abort (#+sbcl sb-sys:interactive-interrupt
-			      #+ccl ccl:interrupt-signal-condition
-			      #+clisp system::simple-interrupt-condition
-			      #+ecl ext:interactive-interrupt
-			      #+allegro excl:interrupt-signal)
+(eval-when (compile load eval)
+
+  (defun get-implementation-condition ()
+    (quote
+     #+sbcl sb-sys:interactive-interrupt
+     #+ccl ccl:interrupt-signal-condition
+     #+clisp system::simple-interrupt-condition
+     #+ecl ext:interactive-interrupt
+     #+allegro excl:interrupt-signal
+     #+lispworks conditions:keyboard-break)))
+
+(define-condition user-abort (#.(get-implementation-condition))
   ()
   (:documentation "condition that inherits from implementation specific interrupt condition"))
 
@@ -23,11 +30,7 @@
 
 (defmacro with-user-abort (&body body)
   "execute BODY, signalling user-abort if the interrupt signal is received"
-  `(handler-bind ((#+sbcl sb-sys:interactive-interrupt
-		   #+ccl ccl:interrupt-signal-condition
-		   #+clisp system::simple-interrupt-condition
-		   #+ecl ext:interactive-interrupt
-		   #+allegro excl:interrupt-signal
+  `(handler-bind ((#.(get-implementation-condition)
 		   
 		   #'user-abort))
      ,@body))
